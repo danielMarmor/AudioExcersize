@@ -7,6 +7,10 @@ import LongGuitar from './assets/longGuitar.jpg';
 import dezibels from './assets/dezibels.jpg';
 import ableton from './assets/ableton.jpg';
 
+import { I18nManager } from 'react-native';
+
+I18nManager.allowRTL(false)
+
 export const AudioStatuses = {
   idle: 1,
   record: 2,
@@ -120,6 +124,7 @@ export default function App() {
       const { status } = await recorder.createNewLoadedSoundAsync();
       const fileUrl = recorder.getURI();
       const size = await getFileSize(fileUrl);
+      console.log(`size=${size}`);
       const newPlayback = { duration: status.durationMillis, fileName: fileUrl, size: size }
 
       _SecondsCounter = 0;
@@ -161,6 +166,12 @@ export default function App() {
     setAudioStatus(AudioStatuses.idle);
 
   }
+  //IF RECORD COMMITED 
+  const playbackSize = playBack && playBack.size;
+  const playBackKB = playbackSize && (playbackSize / 1000).toFixed(2);
+  const durationSec = playBack && parseInt(playBack.duration / 1000);
+  const playbackDuration = durationSec && getDurationFormat(durationSec);
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -170,10 +181,10 @@ export default function App() {
       </View>
       <View style={styles.mainContainer}>
         <View style={styles.imageContainer}>
-          <Image source={LongGuitar}
+          <Image source={dezibels}
             style={{ width: '50%', height: '100%' }}
           />
-          <Image source={dezibels}
+          <Image source={LongGuitar}
             style={{ width: '50%', height: '100%' }}
           />
         </View>
@@ -182,8 +193,14 @@ export default function App() {
             <Text style={styles.timerText}>{timer}</Text>
           </View>)
           }
+          {audioStatus === AudioStatuses.idle && playBack && (<View style={styles.detailsContainer}>
+            <Text style={styles.detailsText}>
+              {`Recored with duration ${playbackDuration}, ${playBackKB} KB`}
+            </Text>
+          </View>)
+          }
           {audioStatus === AudioStatuses.play && (<View style={styles.sliderContainer}>
-            <Text>{'111'}</Text>
+            <Text>{''}</Text>
           </View>)
           }
         </View>
@@ -280,8 +297,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center'
   },
   timerText: {
-    fontSize: 20,
+    fontSize: 24,
     color: 'white'
+  },
+  detailsText: {
+    fontSize: 16,
+    color: 'white'
+  },
+  detailsContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   sliderContainer: {
     flex: 1,
